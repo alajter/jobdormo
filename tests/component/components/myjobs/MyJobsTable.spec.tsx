@@ -65,12 +65,13 @@ function renderTable(jobs: JobResponse[], overrides: Partial<React.ComponentProp
 }
 
 describe("MyJobsTable", () => {
-  it("renders a row per job with title, company, and location", () => {
+  it("renders a row per job: company first, then the title; the location is in the row's tooltip", () => {
     renderTable([makeJob()]);
 
-    expect(screen.getByText("Software Engineer")).toBeInTheDocument();
-    expect(screen.getByText("Acme Corp")).toBeInTheDocument();
-    expect(screen.getByText("Remote")).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: /Acme Corp.*Software Engineer/ });
+    expect(link).toHaveAttribute("href", "/dashboard/myjobs/job-1");
+    expect(within(link).getByText("Acme Corp")).toBeInTheDocument();
+    expect(screen.getByTitle(/Remote/)).toBeInTheDocument();
     const statusButton = screen.getByRole("button", { name: /Change status/ });
     expect(within(statusButton).getByText("Applied")).toBeInTheDocument();
   });
@@ -177,10 +178,11 @@ describe("MyJobsTable", () => {
       expect(mockPush).toHaveBeenCalledWith("/dashboard/myjobs/job-1");
     });
 
-    it("calls editJob with the job id when Edit Job is clicked", async () => {
+    it("calls editJob with the job id when Edit is picked from the row menu", async () => {
       const { editJob } = renderTable([makeJob()]);
 
-      await user.click(screen.getByRole("button", { name: "Edit Job" }));
+      await user.click(screen.getByTestId("job-actions-menu-btn"));
+      await user.click(screen.getByRole("menuitem", { name: "Edit" }));
 
       expect(editJob).toHaveBeenCalledWith("job-1");
     });
@@ -194,10 +196,11 @@ describe("MyJobsTable", () => {
       expect(onAddNote).toHaveBeenCalledWith("job-1");
     });
 
-    it("opens the delete confirmation dialog and calls deleteJob on confirm", async () => {
+    it("opens the delete confirmation dialog from the row menu and calls deleteJob on confirm", async () => {
       const { deleteJob } = renderTable([makeJob()]);
 
-      await user.click(screen.getByRole("button", { name: "Delete Job" }));
+      await user.click(screen.getByTestId("job-actions-menu-btn"));
+      await user.click(screen.getByRole("menuitem", { name: "Delete" }));
 
       expect(
         screen.getByText("Are you sure you want to delete this job?"),

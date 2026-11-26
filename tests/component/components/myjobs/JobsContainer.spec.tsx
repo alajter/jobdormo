@@ -1055,11 +1055,11 @@ describe("JobsContainer Search Functionality", () => {
       await waitFor(() => expect(getJobsList).toHaveBeenCalledTimes(1));
       await screen.findByRole("table");
 
-      await user.click(screen.getByRole("button", { name: /^Company/ }));
+      await user.click(screen.getByRole("button", { name: /^Job(\s|$)/ }));
 
       await waitFor(() => {
         expect(getJobsList).toHaveBeenLastCalledWith(
-          1, 25, U, U, U, U, U, U, U, { field: "company", dir: "asc" },
+          1, 25, U, U, U, U, U, U, U, { field: "title", dir: "asc" },
         );
       });
     });
@@ -1087,11 +1087,11 @@ describe("JobsContainer Search Functionality", () => {
       await act(async () => {
         vi.advanceTimersByTime(300);
       });
-      await user.click(screen.getByRole("button", { name: /^Company/ }));
+      await user.click(screen.getByRole("button", { name: /^Job(\s|$)/ }));
 
       await waitFor(() => {
         expect(getJobsList).toHaveBeenLastCalledWith(
-          1, 25, U, "Amazon", U, U, U, U, U, { field: "company", dir: "asc" },
+          1, 25, U, "Amazon", U, U, U, U, U, { field: "title", dir: "asc" },
         );
       });
     });
@@ -1100,8 +1100,8 @@ describe("JobsContainer Search Functionality", () => {
       renderComponent();
       await waitFor(() => expect(getJobsList).toHaveBeenCalledTimes(1));
       await screen.findByRole("table");
-      const header = () => screen.getByRole("columnheader", { name: /^Title/ });
-      const button = () => screen.getByRole("button", { name: /^Title/ });
+      const header = () => screen.getByRole("columnheader", { name: /^Job(\s|$)/ });
+      const button = () => screen.getByRole("button", { name: /^Job(\s|$)/ });
 
       await user.click(button());
       await waitFor(() => expect(header()).toHaveAttribute("aria-sort", "ascending"));
@@ -1130,8 +1130,8 @@ describe("JobsContainer Search Functionality", () => {
         .mockReturnValueOnce(older.promise)
         .mockReturnValueOnce(newer.promise);
 
-      await user.click(screen.getByRole("button", { name: /^Company/ }));
-      await user.click(screen.getByRole("button", { name: /^Company/ }));
+      await user.click(screen.getByRole("button", { name: /^Job(\s|$)/ }));
+      await user.click(screen.getByRole("button", { name: /^Job(\s|$)/ }));
 
       await act(async () => {
         newer.resolve({ success: true, data: [mockJobs[1]], total: 1 });
@@ -1140,7 +1140,7 @@ describe("JobsContainer Search Functionality", () => {
         older.resolve({ success: true, data: [mockJobs[0]], total: 1 });
       });
 
-      expect(screen.getByText("Frontend Developer")).toBeInTheDocument();
+      expect(screen.getByText(/Frontend Developer/)).toBeInTheDocument();
       expect(screen.queryByText("Full Stack Developer")).not.toBeInTheDocument();
     });
   });

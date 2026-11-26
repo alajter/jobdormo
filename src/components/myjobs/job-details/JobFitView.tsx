@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { ExternalLink, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -114,8 +115,11 @@ export function JobFitView({
   main,
   side,
   rules = DEFAULT_SEARCH_RULES,
+  status,
 }: {
   rules?: SearchRules;
+  // The status from the job's current timeline stage (the job prop can lag).
+  status?: { label: string; value: string };
   cv?: React.ReactNode;
   main?: React.ReactNode;
   side?: React.ReactNode;
@@ -176,7 +180,7 @@ export function JobFitView({
     addedByYou: !job.automationId && job.createdVia !== "daily-web-agent",
     now: new Date(now),
   }, rules);
-  const open = ["new", "draft"].includes(job.Status?.value ?? "");
+  const open = ["new", "draft"].includes((status ?? job.Status)?.value ?? "");
 
   const location = job.Location?.label ?? "";
   const why: string[] = [
@@ -213,7 +217,7 @@ export function JobFitView({
       {/* Decision: the verdict, why apply, why not. */}
       <div className="grid gap-6 rounded-md border bg-card p-5 @5xl/main:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,1fr)] @5xl/main:gap-8">
         <div className="grid content-start gap-2">
-          <div className="text-xs text-muted-foreground">{open ? "Jobdormo says" : `Status: ${job.Status?.label}`}</div>
+          <div className="text-xs text-muted-foreground">{open ? "Jobdormo says" : `Status: ${(status ?? job.Status)?.label}`}</div>
           {open && <div className={cn("text-2xl font-semibold tracking-tight", VERB_CLASS[pick.verb])}>{FOCUS_VERBS[pick.verb].label}</div>}
           <div className="text-sm text-muted-foreground">{pick.reason}</div>
           <div className="flex flex-wrap gap-x-5 gap-y-1 pt-1 text-sm tabular-nums">
@@ -391,7 +395,7 @@ export function JobFitView({
 
           <FitSection title="This job">
             <dl className="grid">
-              <Fact label="Status">{job.Status?.label}</Fact>
+              <Fact label="Status">{(status ?? job.Status)?.label}</Fact>
               <Fact label="Reach-out">
                 <OutreachStatusBadge key={job.outreachStatus ?? "none"} jobId={job.id} status={job.outreachStatus} updatedAt={job.outreachUpdatedAt} />
               </Fact>
@@ -399,6 +403,24 @@ export function JobFitView({
               <Fact label="Applied">{job.appliedDate ? format(job.appliedDate, "d MMM yyyy") : "Not yet"}</Fact>
               <Fact label="Source">{job.JobSource?.label ?? "–"}</Fact>
               {job.salaryRange && <Fact label="Salary">{job.salaryRange}</Fact>}
+              {job.Resume && (
+                <Fact label="Resume">
+                  <Link href={`/dashboard/profile/resume/${job.Resume.id}`} className="underline-offset-2 hover:underline">
+                    {job.Resume.title}
+                  </Link>
+                </Fact>
+              )}
+              {(job.tags?.length ?? 0) > 0 && (
+                <Fact label="Skills">
+                  <span className="flex flex-wrap gap-1">
+                    {job.tags!.map((tag) => (
+                      <span key={tag.id} className="rounded-md border px-1.5 py-0.5 text-xs">
+                        {tag.label}
+                      </span>
+                    ))}
+                  </span>
+                </Fact>
+              )}
               {job.jobUrl && (
                 <Fact label="Posting">
                   <a href={job.jobUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 underline-offset-2 hover:underline">

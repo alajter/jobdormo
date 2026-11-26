@@ -257,76 +257,45 @@ describe("JobDetails – linked resume", () => {
   });
 });
 
-describe("JobDetails – match data display", () => {
+describe("JobDetails – fit and match", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     chat.clear.mockResolvedValue(undefined);
     searchParams = new URLSearchParams();
   });
 
-  // The score sits in the summary card, the analysis behind the AI Match tab.
-  it("shows the match analysis on the AI Match tab when the job has matchData", () => {
-    onTab("match");
-    const matchData = JSON.stringify({
-      matchScore: 85,
-      summary: "Good match",
-    });
+  // The page opens on the decision: the verdict, the match and the full
+  // analysis one click away.
+  it("shows the match score and keeps the full analysis on the page", () => {
+    const matchData = JSON.stringify({ matchScore: 85, recommendation: "good match", body: "## Summary\nGood match" });
     render(<JobDetails {...baseProps} job={makeJob({ matchScore: 85, matchData })} />);
 
-    expect(screen.getByText("85%")).toBeInTheDocument();
+    expect(screen.getByText("Match").parentElement).toHaveTextContent("Match 85");
+    expect(screen.getByText("Full fit analysis")).toBeInTheDocument();
     expect(screen.getByTestId("match-details")).toBeInTheDocument();
   });
 
-  it("shows the empty state on the AI Match tab when the job has no matchData", () => {
-    onTab("match");
+  it("offers to analyse the fit when the job has no analysis", () => {
     render(<JobDetails {...baseProps} job={makeJob()} />);
 
-    expect(screen.getByText(/no match analysis yet/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /analyse the fit/i })).toBeInTheDocument();
     expect(screen.queryByTestId("match-details")).not.toBeInTheDocument();
   });
 
-  it("shows the saved match score from the job prop", () => {
-    onTab("match");
-    render(
-      <JobDetails
-        job={makeJob({
-          matchScore: 72,
-          matchData: JSON.stringify({
-            matchScore: 72,
-            recommendation: "good match",
-            body: "## Summary",
-          }),
-        })}
-        {...baseProps}
-      />,
-    );
-    expect(screen.getByTestId("circular-score")).toHaveTextContent("72%");
-    expect(screen.getByTestId("match-details")).toBeInTheDocument();
-  });
-
   // Automation saves outside the LLM top-K hold only a keyword pre-rank.
-  it("treats an un-analyzed automation job as not matched", () => {
-    onTab("match");
+  it("treats an un-analyzed automation job as not analysed", () => {
     render(
       <JobDetails
         {...baseProps}
-        job={makeJob({
-          matchScore: 28,
-          matchData: JSON.stringify({ prerankScore: 0.29, analyzed: false }),
-        })}
+        job={makeJob({ matchScore: 28, matchData: JSON.stringify({ prerankScore: 0.29, analyzed: false }) })}
       />,
     );
 
-    expect(screen.queryByTestId("circular-score")).not.toBeInTheDocument();
-    expect(screen.getByText("Not matched")).toBeInTheDocument();
-    expect(screen.getByText(/no match analysis yet/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /analyse the fit/i })).toBeInTheDocument();
     expect(screen.queryByTestId("match-details")).not.toBeInTheDocument();
   });
 });
 
-// The status is derived from the current stage, so it must be read from the
-// stage list the timeline already refetches — a mirrored copy went stale on
-// every stage add, edit and delete, and seeded Edit Job with the old status.
 describe("JobDetails – status from the current stage", () => {
   const statusBadge = () =>
     within(screen.getByText("Status").parentElement!).getAllByText(
@@ -351,40 +320,33 @@ describe("JobDetails – status from the current stage", () => {
   });
 });
 
-describe("JobDetails – tabs", () => {
+describe("JobDetails – one page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     chat.approvalPending = false;
     searchParams = new URLSearchParams();
   });
 
-  // The bar must not shift between jobs, so all six are always present.
-  it("renders all six tabs regardless of what the job has", () => {
+  // No tabs: the decision and fit, the CV, people, notes and the posting all
+  // sit on one page.
+  it("shows every section on the page, without tabs", () => {
     render(<JobDetails {...baseProps} job={makeJob()} />);
 
-    expect(screen.getByRole("tab", { name: /description/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /ai match/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /timeline/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /cover letter/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /notes/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Contacts" })).toBeInTheDocument();
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
+    expect(screen.getByText("Why apply")).toBeInTheDocument();
+    expect(screen.getByText("Why not")).toBeInTheDocument();
+    expect(screen.getByText("Your CV for this job")).toBeInTheDocument();
+    expect(screen.getByText("The posting")).toBeInTheDocument();
+    expect(screen.getByTestId("notes-section")).toBeInTheDocument();
   });
 
-  it("renders a Timeline tab right after Description, with a stage count", () => {
-    render(
-      <JobDetails {...baseProps} job={makeJob({ stages: [stageA, stageB] })} />,
-    );
+  it("shows the timeline with its stage count", () => {
+    render(<JobDetails {...baseProps} job={makeJob({ stages: [stageA, stageB] })} />);
 
-    const tabs = screen.getAllByRole("tab").map((t) => t.textContent);
-    const descriptionAt = tabs.findIndex((t) => t?.startsWith("Description"));
-    const timelineAt = tabs.findIndex((t) => t?.startsWith("Timeline"));
-
-    expect(timelineAt).toBe(descriptionAt + 1);
-    expect(screen.getByRole("tab", { name: /Timeline/ })).toHaveTextContent("2");
+    expect(screen.getByText("Timeline").parentElement).toHaveTextContent("Timeline (2)");
   });
 
-  it("shows an empty state for a job with no stages, keeping its status visible", () => {
-    onTab("timeline");
+  it("shows an empty timeline for a job with no stages, keeping its status visible", () => {
     render(<JobDetails {...baseProps} job={makeJob({ stages: [] })} />);
 
     expect(screen.getByText(/No stages recorded/i)).toBeInTheDocument();
@@ -401,64 +363,27 @@ describe("JobDetails – tabs", () => {
     await userEvent.keyboard("{Escape}");
 
     await userEvent.click(screen.getByTestId("update-status-menu-btn"));
-    expect(
-      screen.getByRole("menuitem", { name: /Change status/ }),
-    ).toBeInTheDocument();
-  });
-
-  it("opens on the Description tab", () => {
-    render(<JobDetails {...baseProps} job={makeJob()} />);
-
-    expect(screen.getByRole("tab", { name: /description/i })).toHaveAttribute(
-      "data-state",
-      "active",
-    );
-  });
-
-  it("puts the picked tab in the URL so a refresh lands on it", async () => {
-    render(<JobDetails {...baseProps} job={makeJob()} />);
-
-    await userEvent.click(screen.getByRole("tab", { name: /ai match/i }));
-    expect(router.replace).toHaveBeenCalledWith("?tab=match", { scroll: false });
-  });
-
-  // It stays mounted on every tab so the ⋮ → Add a Note trigger and the count
-  // badge keep working; the panel's own inactive state is what hides it.
-  it("keeps the notes section mounted while another tab is showing", () => {
-    render(<JobDetails {...baseProps} job={makeJob()} />);
-
-    expect(screen.getByTestId("notes-section")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("notes-section").closest("[data-state]"),
-    ).toHaveAttribute("data-state", "inactive");
+    expect(screen.getByRole("menuitem", { name: /Change status/ })).toBeInTheDocument();
   });
 
   it("shows the cover letter empty state when the job has no letter", () => {
-    onTab("letter");
     render(<JobDetails {...baseProps} job={makeJob()} />);
 
     expect(screen.getByText(/no cover letter yet/i)).toBeInTheDocument();
   });
 
-  it("renders the linked letter on the Cover Letter tab", () => {
-    onTab("letter");
+  it("renders the linked letter in the cover letter section", () => {
     render(
       <JobDetails
         {...baseProps}
         job={makeJob({
           coverLetterId: "cl-1",
-          CoverLetter: {
-            id: "cl-1",
-            title: "Frontend Developer – Acme Corp",
-            content: "<p>Dear Hiring Team,</p>",
-          },
+          CoverLetter: { id: "cl-1", title: "Frontend Developer – Acme Corp", content: "<p>Dear Hiring Team,</p>" },
         })}
       />,
     );
 
-    expect(
-      screen.getByText("Frontend Developer – Acme Corp", { exact: false }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Frontend Developer – Acme Corp", { exact: false })).toBeInTheDocument();
     expect(screen.queryByText(/no cover letter yet/i)).not.toBeInTheDocument();
   });
 });
@@ -470,10 +395,10 @@ describe("JobDetails – AI Match", () => {
     searchParams = new URLSearchParams();
   });
 
-  it("opens the chat and asks for a match when AI Match is clicked", async () => {
+  it("opens the chat and asks for a match when Analyse the fit is clicked", async () => {
     chat.approvalPending = false;
     render(<JobDetails job={makeJob()} {...baseProps} />);
-    await userEvent.click(screen.getByRole("button", { name: /ai match/i }));
+    await userEvent.click(screen.getByRole("button", { name: /analyse the fit/i }));
     await act(async () => {});
     expect(chat.open).toHaveBeenCalled();
     expect(chat.clear).toHaveBeenCalled();
@@ -487,7 +412,7 @@ describe("JobDetails – AI Match", () => {
     chat.approvalPending = false;
     chat.clear.mockRejectedValueOnce(new Error("offline"));
     render(<JobDetails job={makeJob()} {...baseProps} />);
-    await userEvent.click(screen.getByRole("button", { name: /ai match/i }));
+    await userEvent.click(screen.getByRole("button", { name: /analyse the fit/i }));
     await act(async () => {});
     expect(chat.open).toHaveBeenCalled();
     expect(chat.sendMessage).toHaveBeenCalled();
@@ -496,13 +421,16 @@ describe("JobDetails – AI Match", () => {
   it("asks before clearing a conversation with a pending approval", async () => {
     chat.approvalPending = true;
     render(<JobDetails job={makeJob()} {...baseProps} />);
-    await userEvent.click(screen.getByRole("button", { name: /ai match/i }));
+    await userEvent.click(screen.getByRole("button", { name: /analyse the fit/i }));
     expect(
       screen.getByText(/clear the assistant conversation/i),
     ).toBeInTheDocument();
     expect(chat.sendMessage).not.toHaveBeenCalled();
   });
 });
+
+// The cover letter lives in the header's ⋮ menu.
+const openMenu = () => userEvent.click(screen.getByTestId("job-details-actions-menu-btn"));
 
 describe("JobDetails cover letter action", () => {
   beforeEach(() => {
@@ -511,12 +439,13 @@ describe("JobDetails cover letter action", () => {
     searchParams = new URLSearchParams();
   });
 
-  it("stays enabled when no resume is linked", () => {
+  it("stays enabled when no resume is linked", async () => {
     render(<JobDetails {...baseProps} job={makeJob({ resumeId: undefined })} />);
-    expect(screen.getByTestId("generate-cover-letter-btn")).toBeEnabled();
+    await openMenu();
+    expect(screen.getByTestId("generate-cover-letter-btn")).not.toHaveAttribute("aria-disabled");
   });
 
-  it("disables the action for a title-only description", () => {
+  it("disables the action for a title-only description", async () => {
     render(
       <JobDetails
         {...baseProps}
@@ -526,20 +455,23 @@ describe("JobDetails cover letter action", () => {
         })}
       />,
     );
-    expect(screen.getByTestId("generate-cover-letter-btn")).toBeDisabled();
+    await openMenu();
+    expect(screen.getByTestId("generate-cover-letter-btn")).toHaveAttribute("aria-disabled", "true");
   });
 
-  it("enables the action for a real description", () => {
+  it("enables the action for a real description", async () => {
     render(
       <JobDetails {...baseProps} job={makeJob({ resumeId: "resume-1" })} />,
     );
-    expect(screen.getByTestId("generate-cover-letter-btn")).toBeEnabled();
+    await openMenu();
+    expect(screen.getByTestId("generate-cover-letter-btn")).not.toHaveAttribute("aria-disabled");
   });
 
   it("opens the chat and asks for a letter naming the job", async () => {
     render(
       <JobDetails {...baseProps} job={makeJob({ resumeId: "resume-1" })} />,
     );
+    await openMenu();
     await userEvent.click(screen.getByTestId("generate-cover-letter-btn"));
     expect(chat.open).toHaveBeenCalled();
     await waitFor(() => expect(chat.sendMessage).toHaveBeenCalled());
@@ -554,6 +486,7 @@ describe("JobDetails cover letter action", () => {
     render(
       <JobDetails {...baseProps} job={makeJob({ resumeId: "resume-1" })} />,
     );
+    await openMenu();
     await userEvent.click(screen.getByTestId("generate-cover-letter-btn"));
     expect(
       screen.getByText(/clear the assistant conversation/i),
@@ -563,13 +496,14 @@ describe("JobDetails cover letter action", () => {
 
   // Derived from the server prop, not local state: the chat saves the letter
   // server-side and fires router.refresh().
-  it("labels the action Regenerate when a letter is already linked", () => {
+  it("labels the action Regenerate when a letter is already linked", async () => {
     render(
       <JobDetails
         {...baseProps}
         job={makeJob({ resumeId: "resume-1", coverLetterId: "cl-1" })}
       />,
     );
+    await openMenu();
     expect(screen.getByTestId("generate-cover-letter-btn")).toHaveTextContent(
       /regenerate/i,
     );
@@ -644,11 +578,11 @@ describe("JobDetails – company link", () => {
     );
   });
 
-  it("keeps the dot-separated subtitle reading the same", () => {
+  it("leads the header with the company, then the title, then where and how", () => {
     render(<JobDetails {...baseProps} job={makeJob()} />);
 
-    expect(
-      screen.getByRole("link", { name: "Acme Corp" }).parentElement,
-    ).toHaveTextContent("Acme Corp · Remote · Full-time");
+    const heading = screen.getByRole("link", { name: "Acme Corp" }).closest("h1")!;
+    expect(heading).toHaveTextContent("Acme Corp · Frontend Developer");
+    expect(heading.nextElementSibling).toHaveTextContent("Remote · Full-time");
   });
 });

@@ -146,11 +146,11 @@ export function JobDetailsHeader({
           <DropdownMenuContent align="end" className="w-[200px]">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer" disabled={chatBusy} onClick={onMatch}>
+              <DropdownMenuItem className="cursor-pointer" disabled={chatBusy} onClick={onMatch} data-testid="ai-match-menu-item">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Match with AI
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" disabled={!!coverLetterBlockedReason} onClick={onCoverLetter}>
+              <DropdownMenuItem className="cursor-pointer" disabled={!!coverLetterBlockedReason} onClick={onCoverLetter} data-testid="generate-cover-letter-btn">
                 <FileText className="mr-2 h-4 w-4" />
                 {job.coverLetterId ? "Regenerate letter" : "Cover letter"}
               </DropdownMenuItem>

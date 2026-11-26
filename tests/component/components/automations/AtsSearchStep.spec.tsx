@@ -1,3 +1,4 @@
+import { APP_CONSTANTS } from "@/lib/constants";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AtsSearchStep } from "@/components/automations/AtsSearchStep";
@@ -112,8 +113,8 @@ describe("AtsSearchStep batch add", () => {
     );
   });
 
-  it("slices to the remaining slots at the 25 cap", async () => {
-    const existing = Array.from({ length: 24 }, (_, i) => ({
+  it("slices to the remaining slots at the cap", async () => {
+    const existing = Array.from({ length: APP_CONSTANTS.ATS_MAX_COMPANIES - 1 }, (_, i) => ({
       name: `C${i}`,
       token: `c${i}`,
     }));
@@ -122,11 +123,11 @@ describe("AtsSearchStep batch add", () => {
     await clickAddAll();
 
     expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange.mock.calls[0][0].companies).toHaveLength(25);
+    expect(onChange.mock.calls[0][0].companies).toHaveLength(APP_CONSTANTS.ATS_MAX_COMPANIES);
   });
 
   it("reports how many were skipped at the cap", async () => {
-    const existing = Array.from({ length: 24 }, (_, i) => ({
+    const existing = Array.from({ length: APP_CONSTANTS.ATS_MAX_COMPANIES - 1 }, (_, i) => ({
       name: `C${i}`,
       token: `c${i}`,
     }));

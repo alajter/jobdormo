@@ -290,6 +290,7 @@ function JobDetails({
           onTailor={() => setTailorOpen(true)}
           onTab={goTo}
           rules={searchRules}
+          status={currentStatus}
           cv={<JobCvPanel key={String(tailorOpen)} jobId={job.id} onOpen={() => setTailorOpen(true)} />}
           main={
             <>
