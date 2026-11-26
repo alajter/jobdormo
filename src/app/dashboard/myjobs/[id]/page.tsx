@@ -9,6 +9,7 @@ import { getAllJobTitles } from "@/actions/jobtitle.actions";
 import { getAllJobLocations } from "@/actions/jobLocation.actions";
 import { getAllTags } from "@/actions/tag.actions";
 import { getAllJobStageTypes } from "@/actions/jobStageType.actions";
+import { getSearchRules } from "@/actions/searchRules.actions";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -29,6 +30,7 @@ async function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     sources,
     tags,
     stageTypes,
+    searchRules,
   ] = await Promise.all([
     getJobDetails(id),
     getStatusList(),
@@ -38,6 +40,7 @@ async function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     getJobSourceList(),
     getAllTags(),
     getAllJobStageTypes(),
+    getSearchRules(),
   ]);
 
   // A link to a job that was deleted (or never belonged to this user) would
@@ -55,6 +58,7 @@ async function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
         sources={sources}
         tags={tags ?? []}
         stageTypes={stageTypes ?? []}
+        searchRules={searchRules}
       />
     </div>
   );

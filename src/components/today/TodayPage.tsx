@@ -47,7 +47,9 @@ function FocusRow({
   busy,
   running,
   onAction,
+  atsTarget = 75,
 }: {
+  atsTarget?: number;
   r: TodayFocusRow;
   busy?: boolean;
   running?: boolean;
@@ -124,7 +126,7 @@ function FocusRow({
             <span
               className={cn(
                 "text-sm font-semibold",
-                r.atsTailored && r.ats >= 75 ? "text-signal" : r.atsTailored ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground",
+                r.atsTailored && r.ats >= atsTarget ? "text-signal" : r.atsTailored ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground",
               )}
             >
               {r.ats}%
@@ -195,7 +197,7 @@ export function TodayPage({ data, findings = [] }: { data: TodayData; findings?:
           if (!res.success || !res.result) return toastError(res.message ?? `Couldn't tailor ${r.company}.`);
           const { after, missing } = res.result.ats;
           const high = (res.result.review ?? []).filter((i) => i.severity === "high").length;
-          if (after >= 75 && high === 0) toastSuccess(`${r.company}: CV ready, ${after}% ATS.`);
+          if (after >= data.atsTarget && high === 0) toastSuccess(`${r.company}: CV ready, ${after}% ATS.`);
           else {
             toastInfo(`${r.company}: ${after}% ATS${high ? `, ${high} must-fix` : ""}. ${missing.length ? "Answer the questions to raise it." : ""}`);
             setJobDialog({ kind: "tailor", row: r });
@@ -290,7 +292,7 @@ export function TodayPage({ data, findings = [] }: { data: TodayData; findings?:
           </div>
           <ul>
             {act.map((r) => (
-              <FocusRow key={r.id} r={r} busy={busy} running={tailoring.includes(r.id)} onAction={(a) => quick(r, a)} />
+              <FocusRow key={r.id} r={r} busy={busy} running={tailoring.includes(r.id)} onAction={(a) => quick(r, a)} atsTarget={data.atsTarget} />
             ))}
           </ul>
           </>
@@ -302,7 +304,7 @@ export function TodayPage({ data, findings = [] }: { data: TodayData; findings?:
             </summary>
             <ul>
               {skip.map((r) => (
-                <FocusRow key={r.id} r={r} busy={busy} onAction={(a) => quick(r, a)} />
+                <FocusRow key={r.id} r={r} busy={busy} onAction={(a) => quick(r, a)} atsTarget={data.atsTarget} />
               ))}
             </ul>
           </details>

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { focusFor, isBigCompany, isJuniorCsRole, rankFocus, type FocusJob } from "@/lib/focus";
+import { focusFor, rankFocus, type FocusJob } from "@/lib/focus";
+import { normalizeSearchRules } from "@/models/searchRules.model";
+
+const rules = normalizeSearchRules({ maxCompanySize: 1000, seniorOnlyRoles: ["customer success"] });
 
 const now = new Date("2026-11-26T08:00:00Z");
 const job = (o: Partial<FocusJob>): FocusJob => ({
@@ -17,10 +20,14 @@ describe("focusFor", () => {
   it("says tailor for a good fit without a CV at the target", () => {
     expect(focusFor(job({ match: 74, atsBase: 52 }))).toMatchObject({ verb: "tailor", reason: "Good fit; no CV for it yet" });
   });
-  it("skips big companies and junior CS roles", () => {
-    expect(focusFor(job({ size: "1001-5000" })).verb).toBe("skip");
-    expect(focusFor(job({ title: "Customer Success Manager" })).verb).toBe("skip");
-    expect(focusFor(job({ title: "VP Customer Success" })).verb).not.toBe("skip");
+  it("skips companies over the size limit and roles below the senior level, per the user's rules", () => {
+    expect(focusFor(job({ size: "1001-5000" }), rules).verb).toBe("skip");
+    expect(focusFor(job({ title: "Customer Success Manager" }), rules).verb).toBe("skip");
+    expect(focusFor(job({ title: "VP Customer Success" }), rules).verb).not.toBe("skip");
+  });
+  it("has no size or seniority rule until the user sets one", () => {
+    expect(focusFor(job({ size: "10001+" })).verb).not.toBe("skip");
+    expect(focusFor(job({ title: "Customer Success Manager" })).verb).not.toBe("skip");
   });
   it("skips stale and weak-fit scan finds, but never a job added by hand", () => {
     expect(focusFor(job({ postedAt: "2025-08-22" })).verb).toBe("skip");
@@ -36,18 +43,7 @@ describe("focusFor", () => {
       job({ id: "t", match: 62 }),
       job({ id: "a", hasTailored: true, atsTailored: 77, match: 60 }),
       job({ id: "t2", match: 74 }),
-    ]);
+    ], rules);
     expect(r.map((x) => x.id)).toEqual(["a", "t2", "t", "s"]);
-  });
-});
-
-describe("helpers", () => {
-  it("reads company sizes", () => {
-    expect(isBigCompany("51-200")).toBe(false);
-    expect(isBigCompany("1001-5000")).toBe(true);
-    expect(isBigCompany(null)).toBe(false);
-  });
-  it("treats product roles as not CS", () => {
-    expect(isJuniorCsRole("Product Manager, Customer Experience")).toBe(false);
   });
 });

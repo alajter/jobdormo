@@ -1,4 +1,5 @@
 import "server-only";
+import { getSearchRulesFor } from "@/lib/search/rules.server";
 import path from "path";
 import { generateText } from "ai";
 import prisma from "@/lib/db";
@@ -131,6 +132,7 @@ export async function tailorCvForJob(
   opts: { instructions?: string; facts?: TailorFact[] } = {},
 ): Promise<TailorResult> {
   const { instructions } = opts;
+  const atsTarget = (await getSearchRulesFor(userId)).atsTarget;
   const facts = (opts.facts ?? [])
     .filter((f) => f && typeof f.keyword === "string" && typeof f.answer === "string" && f.answer.trim())
     .slice(0, 25)
@@ -233,7 +235,7 @@ ${numbered(blocks)}`,
   for (let pass = 0; pass < 2; pass++) {
   const cov = keywordCoverage(html, keywords);
   const stillMissing = cov.missing;
-  if (!stillMissing.length || (pass > 0 && cov.score >= ATS_TARGET)) break;
+  if (!stillMissing.length || (pass > 0 && cov.score >= atsTarget)) break;
   {
     const cur = listCvBlocks(html);
     const { text: fill } = await generateText({

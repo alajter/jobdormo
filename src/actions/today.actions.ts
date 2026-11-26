@@ -4,6 +4,7 @@ import { requireUser } from "./shared";
 import { rankFocus, type FocusVerb } from "@/lib/focus";
 import { getPeopleAtCompanies, getSearchHQ, type PersonRow } from "./people.actions";
 import { getDailyScanStatus, type DailyScanStatus } from "@/lib/schedule/dailyScan";
+import { getSearchRulesFor } from "@/lib/search/rules.server";
 
 // Days after applying with no reply before an application shows up as
 // "check in" on Today.
@@ -37,6 +38,7 @@ export type TodayData = {
   resultsDue: { id: string; topic: string | null; postedAt: Date }[];
   lastPostedAt: Date | null;
   scan: DailyScanStatus | null;
+  atsTarget: number;
 };
 
 const highIssues = (review: string | null): number => {
@@ -100,6 +102,7 @@ export const getToday = async (): Promise<{ success: true; data: TodayData } | {
     const companyOf = new Map(open.map((j) => [j.id, j.Company.id]));
     const urlOf = new Map(open.map((j) => [j.id, j.jobUrl]));
 
+    const rules = await getSearchRulesFor(user.id);
     const ranked = rankFocus(
       open.map((j) => ({
         id: j.id,
@@ -116,6 +119,7 @@ export const getToday = async (): Promise<{ success: true; data: TodayData } | {
         postedAt: j.postedAt,
         addedByYou: !j.automationId && j.createdVia !== "daily-web-agent",
       })),
+      rules,
     );
 
     const now = Date.now();
@@ -152,6 +156,7 @@ export const getToday = async (): Promise<{ success: true; data: TodayData } | {
         resultsDue: resultsDue.filter((p) => p.postedAt).map((p) => ({ id: p.id, topic: p.topic, postedAt: p.postedAt! })),
         lastPostedAt: hqData?.lastPostedAt ?? null,
         scan,
+        atsTarget: rules.atsTarget,
       },
     };
   } catch {

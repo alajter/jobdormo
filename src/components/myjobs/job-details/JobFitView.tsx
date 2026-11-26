@@ -7,7 +7,8 @@ import { OutreachStatusBadge } from "../OutreachStatusBadge";
 import { getWorkplaceTypeLabel, type JobResponse } from "@/models/job.model";
 import type { JobMatchData } from "@/models/ai.schemas";
 import { getCompanyAreaLabel } from "@/models/companyArea.model";
-import { FOCUS_ATS_TARGET, FOCUS_STALE_DAYS, FOCUS_VERBS, focusFor, isBigCompany } from "@/lib/focus";
+import { FOCUS_VERBS, focusFor } from "@/lib/focus";
+import { DEFAULT_SEARCH_RULES, isTooBig, locationCheck, type SearchRules } from "@/models/searchRules.model";
 import { parseMatchBody, postingRequirements, type FitItem } from "@/lib/jobs/matchSections";
 import { postedAgo } from "@/lib/jobs/postedDate";
 import { cn } from "@/lib/utils";
@@ -24,8 +25,6 @@ const short = (s: string, max = 110) => {
   return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,:;]$/, "")}…`;
 };
 
-// Cities next to Tel Aviv: a commute to check, not a reason to skip.
-const NEAR_TEL_AVIV = /\b(ramat[\s-]?gan|givatayim|bnei[\s-]?brak|herzliya|holon|bat[\s-]?yam|petah[\s-]?tikva|petach[\s-]?tikva)\b/i;
 
 const VERB_CLASS = {
   apply: "text-signal",
@@ -114,7 +113,9 @@ export function JobFitView({
   cv,
   main,
   side,
+  rules = DEFAULT_SEARCH_RULES,
 }: {
+  rules?: SearchRules;
   cv?: React.ReactNode;
   main?: React.ReactNode;
   side?: React.ReactNode;
@@ -174,15 +175,14 @@ export function JobFitView({
     postedAt: job.postedAt,
     addedByYou: !job.automationId && job.createdVia !== "daily-web-agent",
     now: new Date(now),
-  });
+  }, rules);
   const open = ["new", "draft"].includes(job.Status?.value ?? "");
 
   const location = job.Location?.label ?? "";
-  const remote = job.workplaceType === "remote";
   const why: string[] = [
     ...(m?.met ?? []).slice(0, 5).map((i) => (i.label ? `${i.label}.` : `${short(i.detail)}.`)),
-    ...(company?.size && !isBigCompany(company.size) ? [`${[company.stage, `${company.size} people`].filter(Boolean).join(", ")}: the size you're looking for.`] : []),
-    ...(tailored != null && tailored >= FOCUS_ATS_TARGET && !highIssues ? [`Your CV for it is ready (${tailored}% ATS).`] : []),
+    ...(company?.size && rules.maxCompanySize && !isTooBig(company.size, rules) ? [`${[company.stage, `${company.size} people`].filter(Boolean).join(", ")}: within your size limit.`] : []),
+    ...(tailored != null && tailored >= rules.atsTarget && !highIssues ? [`Your CV for it is ready (${tailored}% ATS).`] : []),
     ...(job.outreachStatus === "referred" ? ["You have a referral."] : job.outreachStatus === "replied" ? ["Someone there replied to you."] : []),
     ...(known.length
       ? [`You know ${known.slice(0, 2).map((p) => `${p.name}${p.title ? ` (${p.title})` : ""}`).join(" and ")}${known.length > 2 ? ` and ${known.length - 2} more` : ""} there: ask before applying.`]
@@ -193,19 +193,16 @@ export function JobFitView({
     ...(m?.dealBreakers ? [short(m.dealBreakers, 140)] : []),
     ...(m?.missing ?? []).map((i) => (i.label ? `Missing: ${i.label} (${short(i.detail, 90)})` : `${short(i.detail)}.`)),
     ...(m?.partial ?? []).slice(0, 3).map((i) => (i.label ? `Partly: ${i.label} (${short(i.detail, 90)})` : `${short(i.detail)}.`)),
-    ...(isBigCompany(company?.size) ? [`Big company (${company?.size} people).`] : []),
-    ...(location && !remote && !/tel[\s-]?aviv/i.test(location)
-      ? [
-          NEAR_TEL_AVIV.test(location)
-            ? `Office in ${location.split(",")[0]}, next to Tel Aviv: check the commute.`
-            : `Office in ${location}, outside Tel Aviv.`,
-        ]
-      : []),
-    ...(age != null && age > FOCUS_STALE_DAYS ? [`Posted ${age} days ago; it may be filled.`] : []),
+    ...(isTooBig(company?.size, rules) ? [`Bigger than you want (${company?.size} people).`] : []),
+    ...(() => {
+      const loc = locationCheck(location, job.workplaceType ?? "", rules);
+      return loc ? [loc.reason] : [];
+    })(),
+    ...(age != null && age > rules.staleDays ? [`Posted ${age} days ago; it may be filled.`] : []),
     ...(tailored == null
       ? [`No CV for it yet; your generic CV matches ${job.atsBase ?? "?"}% of its keywords.`]
-      : tailored < FOCUS_ATS_TARGET
-        ? [`CV at ${tailored}% ATS, below ${FOCUS_ATS_TARGET}%.`]
+      : tailored < rules.atsTarget
+        ? [`CV at ${tailored}% ATS, below ${rules.atsTarget}%.`]
         : highIssues
           ? [`CV has ${highIssues} must-fix issue${highIssues === 1 ? "" : "s"}.`]
           : []),
@@ -226,7 +223,7 @@ export function JobFitView({
             </span>
             <span>
               <span className="text-muted-foreground">CV </span>
-              <span className={cn("font-semibold", tailored != null && tailored >= FOCUS_ATS_TARGET ? "text-signal" : "")}>
+              <span className={cn("font-semibold", tailored != null && tailored >= rules.atsTarget ? "text-signal" : "")}>
                 {tailored != null ? `${tailored}%` : job.atsBase != null ? `${job.atsBase}% generic` : "–"}
               </span>
             </span>

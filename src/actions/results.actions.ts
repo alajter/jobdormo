@@ -2,6 +2,7 @@
 import prisma from "@/lib/db";
 import { requireUser } from "./shared";
 import { summarizeResults, type ResultsSummary } from "@/lib/results";
+import { getSearchRulesFor } from "@/lib/search/rules.server";
 
 const PURSUED = ["applied", "interview", "offer", "offer-accepted", "offer-declined", "rejected", "withdrawn"];
 
@@ -38,7 +39,9 @@ export const getResults = async (): Promise<ResultsSummary | null> => {
       }),
     ]);
     const kind = (k: string) => activity.find((a) => a.kind === k)?._count._all ?? 0;
+    const { atsTarget } = await getSearchRulesFor(user.id);
     return summarizeResults({
+      atsTarget,
       apps: jobs
         // A job archived before applying was never an application.
         .filter((j) => j.appliedDate || j.Status.value !== "archived")

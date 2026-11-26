@@ -4,8 +4,10 @@ import path from "path";
 import prisma from "@/lib/db";
 import { requireUser } from "./shared";
 import { cvPath, loadCvTracks } from "@/lib/cv/tracks";
+import { getSearchRulesFor } from "@/lib/search/rules.server";
 
 export type CvLibrary = {
+  atsTarget: number;
   tracks: { id: string; label: string; pdf: string | null; updatedAt: Date | null }[];
   jobCvs: {
     jobId: string;
@@ -80,5 +82,5 @@ export const getCvLibrary = async (): Promise<CvLibrary> => {
     }
   }
   other.sort((a, b) => +b.updatedAt - +a.updatedAt);
-  return { tracks, jobCvs, other };
+  return { atsTarget: (await getSearchRulesFor(user.id)).atsTarget, tracks, jobCvs, other };
 };

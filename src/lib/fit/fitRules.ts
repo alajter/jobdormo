@@ -28,37 +28,26 @@ export const FIT_VERDICTS: Record<FitVerdict, { label: string }> = {
   skip: { label: "Skip" },
 };
 
-// Cities next to Tel Aviv: a commute to check, not a reason to skip.
-const NEAR_TEL_AVIV = /\b(ramat[\s-]?gan|givatayim|bnei[\s-]?brak|herzliya|holon|bat[\s-]?yam|petah[\s-]?tikva|petach[\s-]?tikva)\b/i;
+import { isBelowSeniority, isTooBig, locationCheck, type SearchRules } from "@/models/searchRules.model";
 
-/** The owner's hard rules: office location, company size, CS level. */
-export function fitFlags(input: {
-  location: string;
-  workplace: string;
-  size: string;
-  title: string;
-  big: boolean;
-  juniorCs: boolean;
-}): { reasons: string[]; hard: boolean } {
+/** The user's hard rules (Settings → Search rules): office location, company size, role level. */
+export function fitFlags(
+  input: { location: string; workplace: string; size: string; title: string },
+  rules: SearchRules,
+): { reasons: string[]; hard: boolean } {
   const reasons: string[] = [];
   let hard = false;
-  const remote = /remote/i.test(input.workplace);
-  const loc = input.location;
-  if (loc && !remote) {
-    if (/tel[\s-]?aviv\s+district|center district|central district/i.test(loc) && !/tel[\s-]?aviv[-\s]?(yafo|jaffa)?\s*,/i.test(loc))
-      reasons.push(`"${loc}" can mean anywhere around Tel Aviv: check the office address.`);
-    else if (NEAR_TEL_AVIV.test(loc)) reasons.push(`Office in ${loc.split(",")[0]}, next to Tel Aviv: check the commute.`);
-    else if (!/tel[\s-]?aviv/i.test(loc)) {
-      reasons.push(`Office in ${loc}, outside Tel Aviv.`);
-      hard = true;
-    }
+  const loc = locationCheck(input.location, input.workplace, rules);
+  if (loc) {
+    reasons.push(loc.reason);
+    hard = hard || loc.hard;
   }
-  if (input.big) {
-    reasons.push(`Big company (${input.size} people).`);
+  if (isTooBig(input.size, rules)) {
+    reasons.push(`Bigger than you want (${input.size} people).`);
     hard = true;
   }
-  if (input.juniorCs) {
-    reasons.push("Customer Success below VP/Head.");
+  if (isBelowSeniority(input.title, rules)) {
+    reasons.push("Below the level you take this kind of role at.");
     hard = true;
   }
   return { reasons, hard };

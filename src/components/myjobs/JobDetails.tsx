@@ -38,6 +38,7 @@ import { OutreachDialog } from "./job-details/OutreachDialog";
 import { TailorCvDialog } from "./job-details/TailorCvDialog";
 import { JobCvPanel } from "./job-details/JobCvPanel";
 import { FitSection, JobFitView } from "./job-details/JobFitView";
+import type { SearchRules } from "@/models/searchRules.model";
 import { JobTabEmptyState } from "./job-details/JobTabEmptyState";
 import { CoverLetterTab } from "./job-details/CoverLetterTab";
 import { useAutoMatch } from "./job-details/useAutoMatch";
@@ -73,6 +74,7 @@ type JobDetailsProps = {
   sources: JobSource[];
   tags: Tag[];
   stageTypes: JobStageTypeRef[];
+  searchRules?: SearchRules;
 };
 
 function JobDetails({
@@ -84,6 +86,7 @@ function JobDetails({
   sources,
   tags,
   stageTypes,
+  searchRules,
 }: JobDetailsProps) {
   const {
     open: openChat,
@@ -286,6 +289,7 @@ function JobDetails({
           onMatch={onMatch}
           onTailor={() => setTailorOpen(true)}
           onTab={goTo}
+          rules={searchRules}
           cv={<JobCvPanel key={String(tailorOpen)} jobId={job.id} onOpen={() => setTailorOpen(true)} />}
           main={
             <>

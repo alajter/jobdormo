@@ -7,7 +7,7 @@ import { keywordCoverage } from "@/lib/cv/cvEdits";
 import { loadCvTracks, readTrackCvHtml } from "@/lib/cv/tracks";
 import { guessTrack } from "@/models/cvTrack.model";
 import { normalizeCompany } from "@/models/people.model";
-import { isBigCompany, isJuniorCsRole } from "@/lib/focus";
+import { getSearchRulesFor } from "@/lib/search/rules.server";
 import { fitFlags, type FitCheck, type FitVerdict } from "./fitRules";
 
 // "Does this position fit me?" for a pasted posting, before it goes on the
@@ -117,7 +117,7 @@ ${text.slice(0, 6000)}`,
   const verdict: FitVerdict = j.verdict === "apply" || j.verdict === "skip" ? j.verdict : "long_shot";
   const list = (v: unknown[] | undefined) => (Array.isArray(v) ? v.filter((s): s is string => typeof s === "string").map((s) => s.slice(0, 300)).slice(0, 6) : []);
 
-  const flags = fitFlags({ location, workplace, size, title, big: isBigCompany(size), juniorCs: isJuniorCsRole(title) });
+  const flags = fitFlags({ location, workplace, size, title }, await getSearchRulesFor(userId));
   return {
     company,
     title,

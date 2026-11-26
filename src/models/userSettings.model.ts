@@ -1,3 +1,4 @@
+import type { SearchRules } from "@/models/searchRules.model";
 import { AiProvider } from "./ai.model";
 import type { GoalTargetsByMonth } from "./dailyGoals.model";
 
@@ -40,6 +41,8 @@ export interface UserSettingsData {
   jobSearch?: JobSearchSettings;
   display: DisplaySettings;
   goals?: GoalSettings;
+  // Settings → Search rules (normalised with normalizeSearchRules on read).
+  searchRules?: Partial<SearchRules>;
 }
 
 export interface UserSettings {

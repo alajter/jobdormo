@@ -5,7 +5,6 @@ import { Download, ExternalLink } from "lucide-react";
 import type { CvLibrary } from "@/actions/cvLibrary.actions";
 import { cn } from "@/lib/utils";
 
-const TARGET = 75;
 const CLOSED = ["Archived", "Rejected", "Withdrawn", "Expired", "Offer Declined"];
 const fileUrl = (rel: string, download = false) =>
   `/api/cv/file?path=${encodeURIComponent(rel)}${download ? "&download=1" : ""}`;
@@ -40,6 +39,7 @@ const Row = ({ children }: { children: React.ReactNode }) => (
 );
 
 export function CvLibraryPage({ data, gaps, knowledge }: { data: CvLibrary; gaps: React.ReactNode; knowledge: React.ReactNode }) {
+  const TARGET = data.atsTarget;
   const isReady = (j: CvLibrary["jobCvs"][number]) => (j.ats ?? 0) >= TARGET && j.mustFix === 0;
   // Open jobs first, ready-to-send at the top; closed ones folded away.
   const openCvs = data.jobCvs

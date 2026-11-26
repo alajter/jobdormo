@@ -1,10 +1,10 @@
 "use client";
 
-import { Bot, CalendarClock, Database, Key, Network, Palette, Plug, UserRound } from "lucide-react";
+import { Bot, CalendarClock, Database, Key, Network, Palette, Plug, SlidersHorizontal, UserRound } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 
-export type SettingsSection = "ai-provider" | "about-me" | "connections" | "daily-scan" | "api-keys" | "appearance" | "mcp-access" | "data";
+export type SettingsSection = "ai-provider" | "search-rules" | "about-me" | "connections" | "daily-scan" | "api-keys" | "appearance" | "mcp-access" | "data";
 
 const SETTINGS_SECTIONS: {
   id: SettingsSection;
@@ -12,6 +12,7 @@ const SETTINGS_SECTIONS: {
   icon: typeof Bot;
 }[] = [
   { id: "ai-provider", label: "AI Provider", icon: Bot },
+  { id: "search-rules", label: "Search rules", icon: SlidersHorizontal },
   { id: "about-me", label: "Career knowledge", icon: UserRound },
   { id: "connections", label: "LinkedIn connections", icon: Network },
   { id: "daily-scan", label: "Daily scan", icon: CalendarClock },

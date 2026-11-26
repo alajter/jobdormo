@@ -4,7 +4,7 @@
 
 export const MIN_GROUP = 5;
 export const SILENT_DAYS = 14;
-export const CV_TARGET = 75;
+export const CV_TARGET = 75; // default; the user's Search rules can change it
 
 export type Outcome = "offer" | "interview" | "rejected" | "withdrawn" | "waiting";
 
@@ -76,10 +76,10 @@ export function routeOf(a: AppRow): string {
 }
 
 /** The CV that went out with the application (not the one on file now). */
-export function cvOf(a: AppRow): string {
+export function cvOf(a: AppRow, target = CV_TARGET): string {
   if (a.sentCv === "generic") return "Generic CV";
   if (a.sentCv === "tailored")
-    return (a.sentAts ?? 0) >= CV_TARGET ? `Tailored CV (${CV_TARGET}%+)` : `Tailored, below ${CV_TARGET}%`;
+    return (a.sentAts ?? 0) >= target ? `Tailored CV (${target}%+)` : `Tailored, below ${target}%`;
   return "CV not recorded";
 }
 
@@ -110,7 +110,9 @@ export function summarizeResults(input: {
   network: ResultsSummary["network"];
   posts: ResultsSummary["posts"];
   now?: Date;
+  atsTarget?: number;
 }): ResultsSummary {
+  const target = input.atsTarget ?? CV_TARGET;
   const now = input.now ?? new Date();
   const apps = input.apps;
   const outcomes = apps.map((a) => ({ a, o: outcomeOf(a) }));
@@ -132,7 +134,7 @@ export function summarizeResults(input: {
         company: a.company,
         days: a.appliedAt && rej ? days(a.appliedAt, rej) : null,
         route: routeOf(a),
-        cv: cvOf(a),
+        cv: cvOf(a, target),
         ats: a.sentAts ?? null,
         afterInterview: a.stages.some((s) => s.status === "interview"),
       };
@@ -152,7 +154,7 @@ export function summarizeResults(input: {
     medianWaitDays,
     silent: waitingDays.filter((w) => w.d >= SILENT_DAYS).map((w) => ({ id: w.a.id, company: w.a.company, title: w.a.title, days: w.d })),
     byRoute: group(apps, routeOf),
-    byCv: group(apps, cvOf),
+    byCv: group(apps, (a) => cvOf(a, target)),
     bySource: group(apps, (a) => a.source ?? "Unknown"),
     rejections,
     progressed,
@@ -160,12 +162,12 @@ export function summarizeResults(input: {
     posts: input.posts,
     findings: [],
   };
-  summary.findings = findingsFor(summary);
+  summary.findings = findingsFor(summary, target);
   return summary;
 }
 
 /** Plain sentences: what's working, what isn't, and what's too early to say. */
-export function findingsFor(s: ResultsSummary): Finding[] {
+export function findingsFor(s: ResultsSummary, target = CV_TARGET): Finding[] {
   const f: Finding[] = [];
   const decided = s.interviews + s.rejected;
 
@@ -211,7 +213,7 @@ export function findingsFor(s: ResultsSummary): Finding[] {
     if (generic.length === s.rejections.length)
       f.push({
         tone: "bad",
-        text: `All ${s.rejected} rejections went out with the generic CV${ats.length ? ` (${Math.min(...ats)}–${Math.max(...ats)}% ATS where scored)` : ""}. Send only tailored CVs at ${CV_TARGET}%+.`,
+        text: `All ${s.rejected} rejections went out with the generic CV${ats.length ? ` (${Math.min(...ats)}–${Math.max(...ats)}% ATS where scored)` : ""}. Send only tailored CVs at ${target}%+.`,
       });
   }
   const tailoredSent = s.byCv.filter((g) => g.key.startsWith("Tailored"));

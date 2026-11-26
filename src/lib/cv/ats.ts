@@ -4,7 +4,8 @@ import prisma from "@/lib/db";
 import { userModel } from "@/lib/people/voice";
 import { guessTrack } from "@/models/cvTrack.model";
 import { keywordCoverage } from "./cvEdits";
-import { ATS_TARGET, postingKeywords } from "./tailor";
+import { postingKeywords } from "./tailor";
+import { getSearchRulesFor } from "@/lib/search/rules.server";
 import type { CvIssue } from "./review";
 import { cvPath, loadCvTracks, readTrackCvHtml } from "./tracks";
 
@@ -101,7 +102,7 @@ export async function tailorStateFor(userId: string, jobId: string) {
     base: job.atsBase,
     tailored: job.atsTailored,
     missing,
-    target: ATS_TARGET,
+    target: (await getSearchRulesFor(userId)).atsTarget,
     review,
     appliedCv: job.appliedCv,
     appliedAts: job.appliedAts,
@@ -110,6 +111,7 @@ export async function tailorStateFor(userId: string, jobId: string) {
 
 /** Open jobs (new or applied) whose CV isn't ready: no tailored CV, or below the target. */
 export async function cvsToFinishFor(userId: string) {
+  const ATS_TARGET = (await getSearchRulesFor(userId)).atsTarget;
   const jobs = await prisma.job.findMany({
     where: {
       userId,

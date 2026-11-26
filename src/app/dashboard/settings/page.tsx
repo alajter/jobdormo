@@ -7,6 +7,7 @@ import CandidateNotesSettings from "@/components/settings/CandidateNotesSettings
 import ApiKeySettings from "@/components/settings/ApiKeySettings";
 import DailyScanSettings from "@/components/settings/DailyScanSettings";
 import LinkedinConnectionsSettings from "@/components/settings/LinkedinConnectionsSettings";
+import SearchRulesSettings from "@/components/settings/SearchRulesSettings";
 import DataSettings from "@/components/settings/DataSettings";
 import DisplaySettings from "@/components/settings/DisplaySettings";
 import McpAccessSettings from "@/components/settings/McpAccessSettings";
@@ -28,6 +29,7 @@ function Settings() {
         />
         <div className="flex-1 min-w-0">
           {activeSection === "ai-provider" && <AiSettings />}
+          {activeSection === "search-rules" && <SearchRulesSettings />}
           {activeSection === "about-me" && <CandidateNotesSettings />}
           {activeSection === "connections" && <LinkedinConnectionsSettings />}
           {activeSection === "daily-scan" && <DailyScanSettings />}
