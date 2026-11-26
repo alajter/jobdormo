@@ -2,7 +2,7 @@
 // Pure and client-safe; the rules come from the user's Search rules (company
 // size, roles taken only at a senior level, the ATS target, staleness), plus
 // people before postings.
-import { DEFAULT_SEARCH_RULES, isBelowSeniority, isTooBig, type SearchRules } from "@/models/searchRules.model";
+import { DEFAULT_SEARCH_RULES, isBelowSeniority, isTooBig, locationCheck, type SearchRules } from "@/models/searchRules.model";
 
 export type FocusVerb = "apply" | "tailor" | "talk" | "look" | "skip";
 
@@ -30,6 +30,8 @@ export type FocusJob = {
   // Added by hand (not by the daily scan): the owner already chose it, so
   // weak fit or an old date never turns it into a skip.
   addedByYou?: boolean;
+  location?: string | null;
+  workplace?: string | null;
   now?: Date;
 };
 
@@ -51,6 +53,8 @@ export function focusFor(j: FocusJob, rules: SearchRules = DEFAULT_SEARCH_RULES)
     return pick("talk", what);
   }
   if (isTooBig(j.size, rules)) return pick("skip", `Bigger than you want (${j.size} people)`);
+  const office = locationCheck(j.location ?? "", j.workplace ?? "", rules);
+  if (office?.hard) return pick("skip", office.reason.replace(/\.$/, ""));
   if (isBelowSeniority(j.title, rules)) return pick("skip", "Below the level you take this kind of role at");
   const age = daysAgo(j.postedAt, now);
   if (!j.addedByYou) {

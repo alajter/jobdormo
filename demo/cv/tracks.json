@@ -1,0 +1,12 @@
+[
+  {
+    "id": "product-manager",
+    "label": "Product Manager",
+    "file": "generic/product-manager.html"
+  },
+  {
+    "id": "ai-product-manager",
+    "label": "AI Product Manager",
+    "file": "generic/ai-product-manager.html"
+  }
+]

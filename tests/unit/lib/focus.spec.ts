@@ -25,6 +25,12 @@ describe("focusFor", () => {
     expect(focusFor(job({ title: "Customer Success Manager" }), rules).verb).toBe("skip");
     expect(focusFor(job({ title: "VP Customer Success" }), rules).verb).not.toBe("skip");
   });
+  it("skips an office outside the home city, but not a remote role or a nearby city", () => {
+    const r = normalizeSearchRules({ homeCity: "Berlin", nearbyCities: ["Potsdam"] });
+    expect(focusFor(job({ location: "Munich", workplace: "ONSITE" }), r)).toMatchObject({ verb: "skip", reason: "Office in Munich, outside Berlin" });
+    expect(focusFor(job({ location: "Munich", workplace: "REMOTE" }), r).verb).not.toBe("skip");
+    expect(focusFor(job({ location: "Potsdam", workplace: "HYBRID" }), r).verb).not.toBe("skip");
+  });
   it("has no size or seniority rule until the user sets one", () => {
     expect(focusFor(job({ size: "10001+" })).verb).not.toBe("skip");
     expect(focusFor(job({ title: "Customer Success Manager" })).verb).not.toBe("skip");

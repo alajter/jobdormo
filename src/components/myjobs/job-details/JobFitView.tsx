@@ -185,7 +185,7 @@ export function JobFitView({
   const location = job.Location?.label ?? "";
   const why: string[] = [
     ...(m?.met ?? []).slice(0, 5).map((i) => (i.label ? `${i.label}.` : `${short(i.detail)}.`)),
-    ...(company?.size && rules.maxCompanySize && !isTooBig(company.size, rules) ? [`${[company.stage, `${company.size} people`].filter(Boolean).join(", ")}: within your size limit.`] : []),
+    ...(company?.size && rules.maxCompanySize && !isTooBig(company.size, rules) ? [`${(([company.stage, `${company.size} people`].filter(Boolean).join(", ")) || "").replace(/^./, (c) => c.toUpperCase())}: within your size limit.`] : []),
     ...(tailored != null && tailored >= rules.atsTarget && !highIssues ? [`Your CV for it is ready (${tailored}% ATS).`] : []),
     ...(job.outreachStatus === "referred" ? ["You have a referral."] : job.outreachStatus === "replied" ? ["Someone there replied to you."] : []),
     ...(known.length

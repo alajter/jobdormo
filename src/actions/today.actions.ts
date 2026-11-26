@@ -68,6 +68,8 @@ export const getToday = async (): Promise<{ success: true; data: TodayData } | {
           outreachStatus: true,
           postedAt: true,
           jobUrl: true,
+          workplaceType: true,
+          Location: { select: { label: true } },
           automationId: true,
           createdVia: true,
           JobTitle: { select: { label: true } },
@@ -118,6 +120,8 @@ export const getToday = async (): Promise<{ success: true; data: TodayData } | {
         outreachStatus: j.outreachStatus,
         postedAt: j.postedAt,
         addedByYou: !j.automationId && j.createdVia !== "daily-web-agent",
+        location: j.Location?.label ?? null,
+        workplace: j.workplaceType,
       })),
       rules,
     );

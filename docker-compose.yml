@@ -27,7 +27,8 @@ services:
     restart: unless-stopped
 
   app:
-    image: ghcr.io/gsync/jobsync:latest
+    # Built from this repo (no published image yet).
+    build: .
     container_name: jobsync_app
     ports:
       - "3737:3737"
