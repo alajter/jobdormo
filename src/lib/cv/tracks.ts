@@ -134,9 +134,23 @@ export function renderTrackCvPdf(trackId: string): Promise<{ pdf: string; pages:
 }
 
 /** Renders an HTML file to a PDF next to it (headless Chrome); resolves with the page count. */
+// Chrome or Chromium for headless PDF rendering: CHROME_PATH, else the
+// usual install locations on macOS, Linux and Windows.
+export function findChrome(): string | null {
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  const candidates =
+    process.platform === "darwin"
+      ? ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Chromium.app/Contents/MacOS/Chromium"]
+      : process.platform === "win32"
+        ? ["C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"]
+        : ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium", "/usr/bin/chromium-browser", "/snap/bin/chromium"];
+  return candidates.find((c) => existsSync(c)) ?? null;
+}
+
 export function renderHtmlToPdf(htmlPath: string): Promise<{ pdf: string; pages: number | null }> {
   const pdf = htmlPath.replace(/\.html$/, ".pdf");
-  const chrome = process.env.CHROME_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+  const chrome = findChrome();
+  if (!chrome) return Promise.reject(new Error("Chrome or Chromium not found: install it or set CHROME_PATH to render PDFs."));
   return new Promise((resolve, reject) => {
     execFile(
       chrome,

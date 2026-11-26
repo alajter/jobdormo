@@ -177,7 +177,7 @@ function FocusRow({
   );
 }
 
-export function TodayPage({ data, findings = [] }: { data: TodayData; findings?: Finding[] }) {
+export function TodayPage({ data, findings = [], setupLeft = 0 }: { data: TodayData; findings?: Finding[]; setupLeft?: number }) {
   const router = useRouter();
   const [busy, start] = useTransition();
   const [open, setOpen] = useState<{ kind: "message" | "log"; person: PersonRow } | null>(null);
@@ -268,6 +268,19 @@ export function TodayPage({ data, findings = [] }: { data: TodayData; findings?:
 
       <div className="grid items-start gap-8 @5xl/main:grid-cols-[minmax(0,1fr)_minmax(320px,400px)] @5xl/main:grid-rows-[auto_1fr] @5xl/main:gap-10 @8xl/main:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] @8xl/main:grid-rows-[auto]">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-7 @5xl/main:row-span-2 @8xl/main:row-span-1">
+      {setupLeft > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-4 py-3 text-sm">
+          <span>
+            <span className="font-semibold">Finish setting up Jobdormo.</span>{" "}
+            <span className="text-muted-foreground">
+              {setupLeft} needed step{setupLeft === 1 ? "" : "s"} left: your AI model, your CV and a few lines about you.
+            </span>
+          </span>
+          <Button size="sm" asChild>
+            <Link href="/dashboard/setup">Set up</Link>
+          </Button>
+        </div>
+      )}
       <TellBox />
 
       <Section
