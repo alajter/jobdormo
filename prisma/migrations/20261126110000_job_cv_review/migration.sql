@@ -1,0 +1,2 @@
+ALTER TABLE "Job" ADD COLUMN "cvReview" TEXT;
+ALTER TABLE "Job" ADD COLUMN "cvReviewedAt" TIMESTAMP(3);

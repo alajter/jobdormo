@@ -1,0 +1,20 @@
+**/node_modules
+npm-debug.log
+**/.next
+.vscode
+.git
+.env*
+
+**/*.db
+**/*.db-journal
+data/
+jobsyncdb/
+
+# Not needed by the build; excluded so edits here don't bust layer cache
+evals
+docs
+changes
+coverage
+tests
+src/generated
+scripts/dist

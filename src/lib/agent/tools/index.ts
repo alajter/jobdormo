@@ -1,0 +1,86 @@
+import type { LanguageModel, ToolApprovalStatus, ToolSet, UIMessageStreamWriter } from "ai";
+import type { PageContext } from "@/models/agent.model";
+import type { NestedGenerationGuard } from "@/lib/agent/nestedGeneration";
+import { addJobNeedsApproval, buildAddJobTool } from "./addJob";
+import { buildGetResumeTool } from "./getResume";
+import { buildReviewResumeTool } from "./reviewResume";
+import { buildMatchJobTool } from "./matchJob";
+import { buildGenerateCoverLetterTool } from "./generateCoverLetter";
+import { buildRecruiterReviewTool } from "./recruiterReview";
+import { buildTailorCvTool } from "./tailorCv";
+
+// The three nested tools deliberately break the "a tool touches neither the
+// route nor provider resolution" rule in CLAUDE.md: they run their own
+// generation, so they need the resolved model and the stream writer. Recorded
+// in docs/architecture/agent-chat.md rather than contorted around.
+export function buildAgentTools(ctx: {
+  userId: string;
+  pastedText?: string;
+  pageContext?: PageContext;
+  model: LanguageModel;
+  provider: string;
+  modelName: string;
+  writer: UIMessageStreamWriter;
+  nestedGuard: NestedGenerationGuard;
+}): ToolSet {
+  return {
+    add_job: buildAddJobTool(ctx.userId, ctx.pastedText),
+    get_resume: buildGetResumeTool(ctx.userId, ctx.pageContext?.resumeId),
+    review_resume: buildReviewResumeTool({
+      userId: ctx.userId,
+      pageResumeId: ctx.pageContext?.resumeId,
+      model: ctx.model,
+      provider: ctx.provider,
+      modelName: ctx.modelName,
+      writer: ctx.writer,
+      guard: ctx.nestedGuard,
+    }),
+    match_job: buildMatchJobTool({
+      userId: ctx.userId,
+      pageJobId: ctx.pageContext?.jobId,
+      model: ctx.model,
+      provider: ctx.provider,
+      modelName: ctx.modelName,
+      writer: ctx.writer,
+      guard: ctx.nestedGuard,
+    }),
+    generate_cover_letter: buildGenerateCoverLetterTool({
+      userId: ctx.userId,
+      pageJobId: ctx.pageContext?.jobId,
+      model: ctx.model,
+      provider: ctx.provider,
+      modelName: ctx.modelName,
+      writer: ctx.writer,
+      guard: ctx.nestedGuard,
+    }),
+    tailor_cv: buildTailorCvTool({ userId: ctx.userId, pageJobId: ctx.pageContext?.jobId }),
+    recruiter_review: buildRecruiterReviewTool({
+      userId: ctx.userId,
+      pageJobId: ctx.pageContext?.jobId,
+      pastedText: ctx.pastedText,
+      model: ctx.model,
+      provider: ctx.provider,
+      modelName: ctx.modelName,
+      writer: ctx.writer,
+      guard: ctx.nestedGuard,
+    }),
+  };
+}
+
+// The only approval gate in the app. A status, never a boolean: a bare true
+// normalizes to no status and the tool runs unasked.
+export function buildAgentToolApproval(pastedText?: string) {
+  return {
+    add_job: (input: { jobDescription?: string }): ToolApprovalStatus =>
+      addJobNeedsApproval(input, pastedText) ? "user-approval" : "not-applicable",
+  };
+}
+
+export {
+  buildAddJobTool,
+  buildGetResumeTool,
+  buildReviewResumeTool,
+  buildMatchJobTool,
+  buildGenerateCoverLetterTool,
+  buildRecruiterReviewTool,
+};

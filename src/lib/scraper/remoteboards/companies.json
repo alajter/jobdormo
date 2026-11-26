@@ -1,0 +1,14 @@
+[
+  { "name": "Remotive (latest remote jobs)", "token": "remotive" },
+  { "name": "Himalayas (remote jobs open to Israel)", "token": "himalayas" },
+  { "name": "We Work Remotely: Product", "token": "wwr-product" },
+  { "name": "We Work Remotely: Full-Stack Programming", "token": "wwr-full-stack" },
+  { "name": "We Work Remotely: Back-End Programming", "token": "wwr-back-end" },
+  { "name": "We Work Remotely: Front-End Programming", "token": "wwr-front-end" },
+  { "name": "We Work Remotely: DevOps and Sysadmin", "token": "wwr-devops" },
+  { "name": "We Work Remotely: Design", "token": "wwr-design" },
+  { "name": "We Work Remotely: Sales and Marketing", "token": "wwr-sales-marketing" },
+  { "name": "We Work Remotely: Management and Finance", "token": "wwr-management-finance" },
+  { "name": "We Work Remotely: Customer Support", "token": "wwr-customer-support" },
+  { "name": "We Work Remotely: All Other", "token": "wwr-other" }
+]

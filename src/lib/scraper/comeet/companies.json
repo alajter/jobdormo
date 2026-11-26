@@ -1,0 +1,334 @@
+[
+  {
+    "name": "A Security",
+    "token": "a_security/EA.007"
+  },
+  {
+    "name": "AI21",
+    "token": "ai21/E6.001"
+  },
+  {
+    "name": "Akeyless",
+    "token": "akeyless/27.006"
+  },
+  {
+    "name": "Alice (formerly ActiveFence)",
+    "token": "activefence/D5.005"
+  },
+  {
+    "name": "Anchor Fintech",
+    "token": "anchorfintech/87.00D"
+  },
+  {
+    "name": "Aqua Security",
+    "token": "aquasec/91.001"
+  },
+  {
+    "name": "Arpeely",
+    "token": "arpeely/57.001"
+  },
+  {
+    "name": "Autobrains",
+    "token": "autobrains/57.004"
+  },
+  {
+    "name": "BioCatch",
+    "token": "biocatch/03.00E"
+  },
+  {
+    "name": "Bizzabo",
+    "token": "bizzabo/A5.000"
+  },
+  {
+    "name": "BlinkOps",
+    "token": "blinkops/C7.004"
+  },
+  {
+    "name": "Blockaid",
+    "token": "blockaid/69.00B"
+  },
+  {
+    "name": "Bridgewise",
+    "token": "bridgewise/F9.009"
+  },
+  {
+    "name": "Buildots",
+    "token": "buildots/36.004"
+  },
+  {
+    "name": "CHEQ",
+    "token": "cheq/65.005"
+  },
+  {
+    "name": "Classiq",
+    "token": "classiq/F7.008"
+  },
+  {
+    "name": "Coralogix",
+    "token": "coralogix/06.004"
+  },
+  {
+    "name": "Cyberillium",
+    "token": "cyberillium/58.004"
+  },
+  {
+    "name": "Cycode",
+    "token": "cycode/A8.00D"
+  },
+  {
+    "name": "Cynet",
+    "token": "cynet/33.00D"
+  },
+  {
+    "name": "DealHub",
+    "token": "dealhub/86.005"
+  },
+  {
+    "name": "Draftt",
+    "token": "draftt/3A.00F"
+  },
+  {
+    "name": "DriveNets",
+    "token": "drivenets/72.006"
+  },
+  {
+    "name": "Earnix",
+    "token": "earnix/93.00B"
+  },
+  {
+    "name": "EasySend",
+    "token": "easysend/D5.009"
+  },
+  {
+    "name": "Exodigo",
+    "token": "exodigo/89.005"
+  },
+  {
+    "name": "Firebolt",
+    "token": "firebolt/26.004"
+  },
+  {
+    "name": "Gambit Security",
+    "token": "gambit_security/BA.00E"
+  },
+  {
+    "name": "Grip Security",
+    "token": "grip/A8.001"
+  },
+  {
+    "name": "groundcover",
+    "token": "groundcover/88.008"
+  },
+  {
+    "name": "Guardio",
+    "token": "guardio/57.000"
+  },
+  {
+    "name": "Guesty",
+    "token": "guesty/10.000"
+  },
+  {
+    "name": "Immunai",
+    "token": "immunai/37.009"
+  },
+  {
+    "name": "Incredibuild",
+    "token": "incredibuild/66.00F"
+  },
+  {
+    "name": "IRONSCALES",
+    "token": "ironscales/1A.007"
+  },
+  {
+    "name": "Ivix",
+    "token": "ivix/09.002"
+  },
+  {
+    "name": "Jazz",
+    "token": "jazz/6A.009"
+  },
+  {
+    "name": "Justt",
+    "token": "justt/36.001"
+  },
+  {
+    "name": "KELA",
+    "token": "kela/2A.004"
+  },
+  {
+    "name": "Kela Technologies",
+    "token": "kelatechnologies/2A.007"
+  },
+  {
+    "name": "Komodor",
+    "token": "komodor/96.005"
+  },
+  {
+    "name": "Legit Security",
+    "token": "legitsecurity.com/37.004"
+  },
+  {
+    "name": "Linx Security",
+    "token": "linxsecurity/99.00C"
+  },
+  {
+    "name": "Lusha",
+    "token": "lusha/73.00B"
+  },
+  {
+    "name": "Majestic Labs",
+    "token": "majesticlabs/AA.004"
+  },
+  {
+    "name": "MIND Security",
+    "token": "mindsecurity/4A.00D"
+  },
+  {
+    "name": "MineOS",
+    "token": "saymine/39.003"
+  },
+  {
+    "name": "Mitiga",
+    "token": "mitiga/26.00B"
+  },
+  {
+    "name": "Morphisec",
+    "token": "morphisec/65.00C"
+  },
+  {
+    "name": "Nagomi Security",
+    "token": "NagomiSecurity/89.00B"
+  },
+  {
+    "name": "Natural Intelligence",
+    "token": "naturalint/71.001"
+  },
+  {
+    "name": "Navina",
+    "token": "navina/E6.00C"
+  },
+  {
+    "name": "NextSilicon",
+    "token": "nextsilicon/18.007"
+  },
+  {
+    "name": "Noma Security",
+    "token": "noma_security/3A.005"
+  },
+  {
+    "name": "Onyx Security",
+    "token": "onyxsecurity/BA.005"
+  },
+  {
+    "name": "Optibus",
+    "token": "optibus/D1.00C"
+  },
+  {
+    "name": "Orchid Security",
+    "token": "orchid_security/4A.001"
+  },
+  {
+    "name": "OX Security",
+    "token": "ox_security/F8.006"
+  },
+  {
+    "name": "Pentera",
+    "token": "pentera/C5.00D"
+  },
+  {
+    "name": "Personetics",
+    "token": "personetics/83.00A"
+  },
+  {
+    "name": "PlainID",
+    "token": "plainid/C4.00C"
+  },
+  {
+    "name": "Port",
+    "token": "port/59.004"
+  },
+  {
+    "name": "Qodo",
+    "token": "qodo/B8.00B"
+  },
+  {
+    "name": "Quantum Machines",
+    "token": "quantummachines/D6.000"
+  },
+  {
+    "name": "Riverside.fm",
+    "token": "riverside-fm/66.009"
+  },
+  {
+    "name": "Sentra",
+    "token": "sentra/87.00B"
+  },
+  {
+    "name": "Silverfort",
+    "token": "silverfort/54.007"
+  },
+  {
+    "name": "Slice Global",
+    "token": "sliceglobal/DA.009"
+  },
+  {
+    "name": "Sunbit",
+    "token": "sunbit/37.001"
+  },
+  {
+    "name": "Team8",
+    "token": "team8/61.003"
+  },
+  {
+    "name": "Terra Security",
+    "token": "terrasecurity/1B.006"
+  },
+  {
+    "name": "ThetaRay",
+    "token": "thetaray/72.00F"
+  },
+  {
+    "name": "Toka",
+    "token": "toka/46.00D"
+  },
+  {
+    "name": "Upstream Security",
+    "token": "upstream/E4.003"
+  },
+  {
+    "name": "Utila",
+    "token": "utila/D9.00F"
+  },
+  {
+    "name": "UVeye",
+    "token": "uveye/92.00F"
+  },
+  {
+    "name": "Vega",
+    "token": "vega/C9.009"
+  },
+  {
+    "name": "Vetric",
+    "token": "vetric/A9.009"
+  },
+  {
+    "name": "Wiliot",
+    "token": "wiliot/F6.003"
+  },
+  {
+    "name": "Zencity",
+    "token": "zencity/56.00B"
+  },
+  {
+    "name": "Zenity",
+    "token": "zenity/19.000"
+  },
+  {
+    "name": "Zero Networks",
+    "token": "zeronetworks/39.00F"
+  },
+  {
+    "name": "ZyG",
+    "token": "zyg/DA.006"
+  }
+]

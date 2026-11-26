@@ -1,0 +1,16 @@
+[
+  { "name": "Team8 (stealth & portfolio)", "token": "team8" },
+  { "name": "TLV Partners portfolio", "token": "tlv-partners" },
+  { "name": "Grove Ventures portfolio", "token": "grove" },
+  { "name": "Hetz Ventures portfolio", "token": "hetz" },
+  { "name": "Vertex Israel portfolio", "token": "vertex-israel" },
+  { "name": "Israel VC Forum (800+ Israeli VC-backed companies)", "token": "israel-vc-forum" },
+  { "name": "Ten Eleven Ventures portfolio (cyber)", "token": "ten-eleven" },
+  { "name": "Ballistic Ventures portfolio (cyber)", "token": "ballistic" },
+  { "name": "Greenfield Partners portfolio", "token": "greenfield" },
+  { "name": "Blumberg Capital portfolio", "token": "blumberg" },
+  { "name": "Insight Partners portfolio", "token": "insight" },
+  { "name": "Sapphire Ventures portfolio", "token": "sapphire" },
+  { "name": "Square Peg portfolio", "token": "square-peg" },
+  { "name": "Essence VC portfolio", "token": "essence" }
+]

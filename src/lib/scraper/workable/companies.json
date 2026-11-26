@@ -1,0 +1,58 @@
+[
+  {
+    "name": "AccessFintech",
+    "token": "accessfintech"
+  },
+  {
+    "name": "Autofleet",
+    "token": "autofleet"
+  },
+  {
+    "name": "CloudShare",
+    "token": "cloudshare"
+  },
+  {
+    "name": "CropX",
+    "token": "cropx"
+  },
+  {
+    "name": "D-ID",
+    "token": "d-id"
+  },
+  {
+    "name": "GOARC",
+    "token": "goarc"
+  },
+  {
+    "name": "Humanz",
+    "token": "humanz"
+  },
+  {
+    "name": "Oversee",
+    "token": "oversee-1"
+  },
+  {
+    "name": "Rayzone Group",
+    "token": "rayzone-group"
+  },
+  {
+    "name": "REAL",
+    "token": "real-dev-inc"
+  },
+  {
+    "name": "Regatta",
+    "token": "regatta-3"
+  },
+  {
+    "name": "RISCO Group",
+    "token": "risco"
+  },
+  {
+    "name": "Tomax",
+    "token": "tomax"
+  },
+  {
+    "name": "Trustmi",
+    "token": "trustmi"
+  }
+]

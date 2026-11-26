@@ -1,0 +1,19 @@
+# Personal setup: only Postgres runs in Docker; the app runs natively with
+# `npm run dev` so it can use the Mac's logged-in Claude Code CLI.
+#   docker compose -f docker-compose.local.yml up -d
+services:
+  db:
+    image: pgvector/pgvector:pg18
+    container_name: jobsync_local_db
+    environment:
+      - POSTGRES_USER=jobsync
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      - POSTGRES_DB=jobsync
+    ports:
+      - "127.0.0.1:5440:5432"
+    volumes:
+      - pgdata_local:/var/lib/postgresql
+    restart: unless-stopped
+volumes:
+  pgdata_local:
+    name: jobsync_local_pgdata
