@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobdormo · a self-hosted job-search assistant</title>
+<meta name="description" content="Jobdormo does the slow parts of a job search overnight: where to focus, CVs tailored without lying, who you know at each company, and what's working. Self-hosted and open source.">
+<meta property="og:title" content="Jobdormo">
+<meta property="og:description" content="A self-hosted job-search assistant: focus, honest tailored CVs, people and results.">
+<meta property="og:image" content="img/today.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231a1714'/><path d='M8 20h16M10 15a6 6 0 0 1 12 0' stroke='%23f7f5f1' stroke-width='2.4' fill='none' stroke-linecap='round'/></svg>">
+<style>
+  :root {
+    --bg: #f8f6f2; --card: #ffffff; --ink: #1c1915; --muted: #6a645b; --line: #e4dfd6;
+    --signal: #1f6b4a; --signal-soft: #e5f1ea; --amber: #a3620f; --red: #b3372b;
+    --radius: 8px; --max: 1120px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14120f; --card: #1b1916; --ink: #f1ede6; --muted: #a8a196; --line: #2c2924;
+      --signal: #6fcf9c; --signal-soft: #1d2b23; --amber: #e2a352; --red: #ef8a7d;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  a { color: inherit; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-decoration: none; }
+  .brand svg { width: 28px; height: 28px; }
+  nav a { margin-left: 22px; color: var(--muted); text-decoration: none; font-size: 15px; }
+  nav a:hover { color: var(--ink); }
+  .hero { padding: 56px 0 28px; display: grid; gap: 20px; max-width: 760px; }
+  .hero h1 { font-size: clamp(32px, 5vw, 50px); line-height: 1.1; letter-spacing: -0.02em; margin: 0; font-weight: 650; }
+  .hero h1 em { font-style: normal; color: var(--signal); }
+  .hero p { font-size: 19px; color: var(--muted); margin: 0; max-width: 640px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: var(--radius); font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid var(--ink); }
+  .btn.primary { background: var(--ink); color: var(--bg); }
+  .btn.ghost { background: transparent; }
+  .btn:focus-visible, a:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+  .shot { margin: 34px 0 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--card); box-shadow: 0 18px 50px -24px rgba(0,0,0,.25); }
+  .shot img { display: block; width: 100%; height: auto; }
+  section { padding: 72px 0 0; }
+  section h2 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 6px; }
+  section > .wrap > p.lede { color: var(--muted); margin: 0 0 28px; max-width: 680px; }
+  .grid { display: grid; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .feature { background: var(--card); padding: 22px 22px 24px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 0 -1px -1px 0; }
+  .feature h3 { margin: 0 0 6px; font-size: 17px; }
+  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+  .verb { font-weight: 650; }
+  .apply { color: var(--signal); } .tailor { color: var(--amber); } .skip { color: var(--red); }
+  .gallery { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  figure { margin: 0; }
+  figure .frame { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--card); }
+  figure img { display: block; width: 100%; height: auto; }
+  figcaption { margin-top: 10px; font-size: 15px; color: var(--muted); }
+  figcaption b { color: var(--ink); font-weight: 600; }
+  .steps { counter-reset: s; display: grid; gap: 14px; padding: 0; margin: 0; list-style: none; max-width: 760px; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+  .steps li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 14px; font-weight: 600; color: var(--muted); background: var(--card); }
+  .steps b { display: block; }
+  .steps span { color: var(--muted); font-size: 15px; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-x: auto; font: 14px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace; margin: 18px 0 0; max-width: 760px; }
+  .note { border-left: 3px solid var(--signal); background: var(--signal-soft); padding: 14px 18px; border-radius: 0 8px 8px 0; max-width: 760px; }
+  .note p { margin: 0; }
+  footer { padding: 64px 0 48px; color: var(--muted); font-size: 14px; }
+  footer .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 20px; }
+  @media (max-width: 640px) {
+    nav a:not(.gh) { display: none; }
+    .hero { padding-top: 28px; }
+    section { padding-top: 56px; }
+  }
+  @media (prefers-reduced-motion: no-preference) { .btn { transition: opacity .15s; } .btn:hover { opacity: .85; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="currentColor"/><path d="M8 20h16M10 15a6 6 0 0 1 12 0" stroke="var(--bg)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+      Jobdormo
+    </a>
+    <nav>
+      <a href="#features">What it does</a>
+      <a href="#start">Get started</a>
+      <a class="gh" href="https://github.com/alajter/jobdormo">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h1>Your job search, done <em>overnight</em>.<br>You just act on it.</h1>
+    <p>Jobdormo is a self-hosted job-search assistant. Every morning it tells you which jobs are worth your time, which CV is ready to send, who you know there and who to follow up with. When something happens, you tell it in one line.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/alajter/jobdormo">Get it on GitHub</a>
+      <a class="btn ghost" href="#start">Try the demo</a>
+    </div>
+  </div>
+
+  <figure class="shot"><img src="img/today.jpg" alt="Jobdormo's Today page: a focus list of jobs to apply to, tailor or follow up on, with match and ATS scores, next to follow-ups, the week's goal and what's working." width="1412" height="840"></figure>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>What it does</h2>
+    <p class="lede">Built around the questions you actually ask in the morning: what needs me, what's worth it, what do I say, and is any of this working.</p>
+    <div class="grid">
+      <div class="feature"><h3>A focus list, not a pile</h3><p>Every open job gets one verb and a reason: <span class="verb apply">Apply</span>, <span class="verb tailor">Tailor</span>, follow up, or <span class="verb skip">Skip</span> (too big, too far, too junior, too old). One-click actions on every row.</p></div>
+      <div class="feature"><h3>Tell it what happened</h3><p>"Acme rejected me." "Sent Dana the intro note, follow up Monday." It proposes the changes; nothing is saved until you press Apply.</p></div>
+      <div class="feature"><h3>Paste a job, see if it fits</h3><p>Apply, long shot or skip, each requirement marked met, partly or missing against your CV, who you know there, and your own rules applied.</p></div>
+      <div class="feature"><h3>Tailored CVs, no lies</h3><p>It uses the posting's keywords wherever they're true for you, asks about the rest and remembers your answers, then fact-checks every line before you send it.</p></div>
+      <div class="feature"><h3>People before postings</h3><p>Import your LinkedIn connections and every job shows who you know at the company, with a message drafted in your voice.</p></div>
+      <div class="feature"><h3>LinkedIn, on a rhythm</h3><p>The next post is always drafted for its slot, rotating your themes and learning from what got results. It never posts for you.</p></div>
+      <div class="feature"><h3>What's working</h3><p>Which route got answers, generic versus tailored CVs, how fast rejections came. It won't call something a pattern until there are enough answers.</p></div>
+      <div class="feature"><h3>A morning scan</h3><p>Company career pages and job boards (Greenhouse, Lever, Ashby, Workable, Comeet, VC portfolio boards), deduplicated and scored against the right CV.</p></div>
+      <div class="feature"><h3>Your rules</h3><p>Home city and commutable cities, the biggest company you'd join, roles you only take at a senior level, your ATS target. Everything reads them.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Every screen answers one question</h2>
+    <p class="lede">No tabs to dig through: the decision first, the evidence next to it.</p>
+    <div class="gallery">
+      <figure><div class="frame"><img src="img/job.jpg" alt="A job page: the verdict, why apply, why not, each requirement against the CV, the tailored CV and people you know at the company." loading="lazy" width="1412" height="840"></div><figcaption><b>Should I apply?</b> The verdict, why and why not, and each requirement against your CV.</figcaption></figure>
+      <figure><div class="frame"><img src="img/results.jpg" alt="The Results page: applications, interviews and rejections, what's working, what isn't, and breakdowns by route, CV and source." loading="lazy" width="847" height="504"></div><figcaption><b>Is it working?</b> Results from your own applications, with counts on every line.</figcaption></figure>
+      <figure><div class="frame"><img src="img/jobs.jpg" alt="The Jobs list in its Review view, best fit first, with match and CV scores." loading="lazy" width="847" height="504"></div><figcaption><b>What's on the board?</b> Review, Pursuing and Closed, best fit first.</figcaption></figure>
+      <figure><div class="frame"><img src="img/search-rules.jpg" alt="Settings, Search rules: home city, nearby cities, largest company, roles only at a senior level." loading="lazy" width="847" height="504"></div><figcaption><b>What do I want?</b> Your search rules, used everywhere.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2>Get started</h2>
+    <p class="lede">You need Node 22.19 or newer, Docker for Postgres, Chrome or Chromium for PDFs, and an AI model: an Anthropic key for the best writing, or Ollama locally for free.</p>
+    <ol class="steps">
+      <li><div><b>Run it</b><span>Clone, install, start Postgres, run the migrations, <code>npm run dev</code>.</span></div></li>
+      <li><div><b>Set it up</b><span>Connect a model, paste your CV once per kind of role, add a few lines about you. About ten minutes.</span></div></li>
+      <li><div><b>Let it work</b><span>Turn on the morning scan and start your day on Today.</span></div></li>
+    </ol>
+<pre><code>git clone https://github.com/alajter/jobdormo.git && cd jobdormo
+npm install && cp .env.example .env
+docker compose -f docker-compose.local.yml up -d
+npx prisma migrate deploy
+npm run dev</code></pre>
+    <p class="lede" style="margin-top:22px">Want to look around first? The repo ships a demo: a fictional candidate with CVs, jobs, people and results, loaded into its own database with one script. See the <a href="https://github.com/alajter/jobdormo#try-the-demo-first">README</a>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Your data stays yours</h2>
+    <div class="note"><p>Everything runs on your machine: the database, your CVs and your notes. The only things that leave it are calls to the AI provider you choose (or none, with Ollama) and the job boards the scan reads. API keys are stored encrypted.</p></div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <div class="row">
+      <span>Jobdormo is open source under the MIT license. Built on <a href="https://github.com/Gsync/jobsync">JobSync</a> by gsync.</span>
+      <a href="https://github.com/alajter/jobdormo">github.com/alajter/jobdormo</a>
+    </div>
+  </footer>
+</div>
+</body>
+</html>
